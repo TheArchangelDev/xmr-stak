@@ -26,6 +26,7 @@ POOLCONF],
  *    bittube (uses cryptonight_bittube2 algorithm)
  *    graft
  *    haven (automatic switch with block version 3 to cryptonight_haven)
+ *	  saronite
  *    intense
  *    masari
  *    monero (use this to support Monero's Oct 2018 fork)
@@ -46,6 +47,7 @@ POOLCONF],
  *    # 4MiB scratchpad memory
  *    cryptonight_bittube2
  *    cryptonight_haven
+ *	  cryptonight_saronite
  *    cryptonight_heavy
  */
 

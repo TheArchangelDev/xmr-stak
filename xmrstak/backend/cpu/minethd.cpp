@@ -395,7 +395,16 @@ bool minethd::self_test()
 			hashf("\x85\x19\xe0\x39\x17\x2b\x0d\x70\xe5\xca\x7b\x33\x83\xd6\xb3\x16\x73\x15\xa4\x22\x74\x7b\x73\xf0\x19\xcf\x95\x28\xf0\xfd\xe3\x41\xfd\x0f\x2a\x63\x03\x0b\xa6\x45\x05\x25\xcf\x6d\xe3\x18\x37\x66\x9a\xf6\xf1\xdf\x81\x31\xfa\xf5\x0a\xaa\xb8\xd3\xa7\x40\x55\x89", 64, out, ctx);
 			bResult = bResult && memcmp(out, "\x90\xdc\x65\x53\x8d\xb0\x00\xea\xa2\x52\xcd\xd4\x1c\x17\x7a\x64\xfe\xff\x95\x36\xe7\x71\x68\x35\xd4\xcf\x5c\x73\x56\xb1\x2f\xcd", 32) == 0;
 		}
+		else if(algo == cryptonight_saronite)
+		{
+			hashf = func_selector(::jconf::inst()->HaveHardwareAes(), false, xmrstak_algo::cryptonight_saronite);
+			hashf("This is a test This is a test This is a test", 44, out, ctx);
+			bResult = bResult &&  memcmp(out, "\xc7\xd4\x52\x9\x2b\x48\xa5\xaf\xae\x11\xaf\x40\x9a\x87\xe5\x88\xf0\x29\x35\xa3\x68\xd\xe3\x6b\xce\x43\xf6\xc8\xdf\xd3\xe3\x9", 32) == 0;
 
+			hashf = func_selector(::jconf::inst()->HaveHardwareAes(), true, xmrstak_algo::cryptonight_saronite);
+			hashf("This is a test This is a test This is a test", 44, out, ctx);
+			bResult = bResult &&  memcmp(out, "\xc7\xd4\x52\x9\x2b\x48\xa5\xaf\xae\x11\xaf\x40\x9a\x87\xe5\x88\xf0\x29\x35\xa3\x68\xd\xe3\x6b\xce\x43\xf6\xc8\xdf\xd3\xe3\x9", 32) == 0;
+		}
 		if(!bResult)
 			printer::inst()->print_msg(L0,
 				"Cryptonight hash self-test failed. This might be caused by bad compiler optimizations.");
@@ -520,6 +529,9 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bNoPrefetc
 	case cryptonight_monero_v8:
 		algv = 10;
 		break;
+	case cryptonight_saronite:
+		algv = 11;
+		break;
 	default:
 		algv = 2;
 		break;
@@ -571,6 +583,11 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bNoPrefetc
 		Cryptonight_hash<N>::template hash<cryptonight_haven, false, true>,
 		Cryptonight_hash<N>::template hash<cryptonight_haven, true, true>,
 
+		Cryptonight_hash<N>::template hash<cryptonight_saronite, false, false>,
+		Cryptonight_hash<N>::template hash<cryptonight_saronite, true, false>,
+		Cryptonight_hash<N>::template hash<cryptonight_saronite, false, true>,
+		Cryptonight_hash<N>::template hash<cryptonight_saronite, true, true>,
+		
 		Cryptonight_hash<N>::template hash<cryptonight_bittube2, false, false>,
 		Cryptonight_hash<N>::template hash<cryptonight_bittube2, true, false>,
 		Cryptonight_hash<N>::template hash<cryptonight_bittube2, false, true>,

@@ -523,8 +523,8 @@ __kernel void JOIN(cn0,ALGO)(__global ulong *input, __global uint4 *Scratchpad, 
 
 	mem_fence(CLK_LOCAL_MEM_FENCE);
 
-// cryptonight_heavy || cryptonight_haven || cryptonight_bittube2
-#if (ALGO == 4 || ALGO == 9 || ALGO == 10)
+// cryptonight_heavy || cryptonight_haven || cryptonight_bittube2 || cryptonight_saronite
+#if (ALGO == 4 || ALGO == 9 || ALGO == 10 || ALGO == 12)
 	__local uint4 xin[8][WORKSIZE];
 
 	/* Also left over threads perform this loop.
@@ -812,6 +812,13 @@ __kernel void JOIN(cn1,ALGO) (__global uint4 *Scratchpad, __global ulong *states
 			long q = n / (d | 0x5);
 			*((__global long*)(Scratchpad + (IDX((idx0) >> 4)))) = n ^ q;
 			idx0 = ((~d) ^ q) & MASK;
+// cryptonight_saronite
+#elif (ALGO == 12)
+			long n = *((__global long*)(Scratchpad + (IDX((idx0) >> 4))));
+			int d = ((__global int*)(Scratchpad + (IDX((idx0) >> 4))))[2];
+			long q = n / (d | 0x5);
+			*((__global long*)(Scratchpad + (IDX((idx0) >> 4)))) = n ^ q;
+			idx0 = (d ^ q ^ 0x33c70f);
 #endif
 
 		}
@@ -875,8 +882,8 @@ __kernel void JOIN(cn2,ALGO) (__global uint4 *Scratchpad, __global ulong *states
 	}
 
 	barrier(CLK_LOCAL_MEM_FENCE);
-// cryptonight_heavy || cryptonight_haven || cryptonight_bittube2
-#if (ALGO == 4 || ALGO == 9 || ALGO == 10)
+// cryptonight_heavy || cryptonight_haven || cryptonight_bittube2 || cryptonight_saronite
+#if (ALGO == 4 || ALGO == 9 || ALGO == 10 || ALGO == 12)
 	__local uint4 xin[8][WORKSIZE];
 #endif
 
@@ -885,8 +892,8 @@ __kernel void JOIN(cn2,ALGO) (__global uint4 *Scratchpad, __global ulong *states
 	if(gIdx < Threads)
 #endif
 	{
-// cryptonight_heavy || cryptonight_haven || cryptonight_bittube2
-#if (ALGO == 4 || ALGO == 9 || ALGO == 10)
+// cryptonight_heavy || cryptonight_haven || cryptonight_bittube2 || cryptonight_saronite
+#if (ALGO == 4 || ALGO == 9 || ALGO == 10 || ALGO == 12)
 		#pragma unroll 2
 		for(int i = 0; i < (MEMORY >> 7); ++i)
 		{
@@ -932,8 +939,8 @@ __kernel void JOIN(cn2,ALGO) (__global uint4 *Scratchpad, __global ulong *states
 #endif
 	}
 
-// cryptonight_heavy or cryptonight_haven || cryptonight_bittube2
-#if (ALGO == 4 || ALGO == 9 || ALGO == 10)
+// cryptonight_heavy or cryptonight_haven || cryptonight_bittube2 || cryptonight_saronite
+#if (ALGO == 4 || ALGO == 9 || ALGO == 10 || ALGO == 12)
 	/* Also left over threads perform this loop.
 	 * The left over thread results will be ignored
 	 */

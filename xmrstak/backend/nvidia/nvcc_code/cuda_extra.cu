@@ -114,7 +114,7 @@ __global__ void cryptonight_extra_gpu_prepare( int threads, uint32_t * __restric
 	int thread = ( blockDim.x * blockIdx.x + threadIdx.x );
 	__shared__ uint32_t sharedMemory[1024];
 
-	if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2)
+	if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2 || ALGO == cryptonight_saronite)
 	{
 		cn_aes_gpu_init( sharedMemory );
 		__syncthreads( );
@@ -160,7 +160,7 @@ __global__ void cryptonight_extra_gpu_prepare( int threads, uint32_t * __restric
 	memcpy( d_ctx_key2 + thread * 40, ctx_key2, 40 * 4 );
 	memcpy( d_ctx_state + thread * 50, ctx_state, 50 * 4 );
 
-	if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2)
+	if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2 || ALGO == cryptonight_saronite)
 	{
 
 		for(int i=0; i < 16; i++)
@@ -184,7 +184,7 @@ __global__ void cryptonight_extra_gpu_final( int threads, uint64_t target, uint3
 
 	__shared__ uint32_t sharedMemory[1024];
 
-	if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2)
+	if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2 || ALGO == cryptonight_saronite)
 	{
 		cn_aes_gpu_init( sharedMemory );
 		__syncthreads( );
@@ -201,7 +201,7 @@ __global__ void cryptonight_extra_gpu_final( int threads, uint64_t target, uint3
 	for ( i = 0; i < 50; i++ )
 		state[i] = ctx_state[i];
 
-	if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2)
+	if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2 || ALGO == cryptonight_saronite)
 	{
 		uint32_t key[40];
 
@@ -298,6 +298,7 @@ extern "C" int cryptonight_extra_cpu_init(nvid_ctx* ctx)
 	if(
 		cryptonight_heavy == ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() ||
 		cryptonight_haven == ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() ||
+		cryptonight_saronite == ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() ||
 		cryptonight_bittube2 == ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo()
 	)
 	{
@@ -349,6 +350,11 @@ extern "C" void cryptonight_extra_cpu_prepare(nvid_ctx* ctx, uint32_t startNonce
 		CUDA_CHECK_KERNEL(ctx->device_id, cryptonight_extra_gpu_prepare<cryptonight_haven><<<grid, block >>>( wsize, ctx->d_input, ctx->inputlen, startNonce,
 			ctx->d_ctx_state,ctx->d_ctx_state2, ctx->d_ctx_a, ctx->d_ctx_b, ctx->d_ctx_key1, ctx->d_ctx_key2 ));
 	}
+	else if(miner_algo == cryptonight_saronite)
+	{
+		CUDA_CHECK_KERNEL(ctx->device_id, cryptonight_extra_gpu_prepare<cryptonight_saronite><<<grid, block >>>( wsize, ctx->d_input, ctx->inputlen, startNonce,
+			ctx->d_ctx_state,ctx->d_ctx_state2, ctx->d_ctx_a, ctx->d_ctx_b, ctx->d_ctx_key1, ctx->d_ctx_key2 ));
+	}
 	else if(miner_algo == cryptonight_bittube2)
 	{
 		CUDA_CHECK_KERNEL(ctx->device_id, cryptonight_extra_gpu_prepare<cryptonight_bittube2><<<grid, block >>>( wsize, ctx->d_input, ctx->inputlen, startNonce,
@@ -394,6 +400,14 @@ extern "C" void cryptonight_extra_cpu_final(nvid_ctx* ctx, uint32_t startNonce, 
 			ctx->device_id,
 			"\n**suggestion: Try to increase the value of the attribute 'bfactor' in the NVIDIA config file.**",
 			cryptonight_extra_gpu_final<cryptonight_haven><<<grid, block >>>( wsize, target, ctx->d_result_count, ctx->d_result_nonce, ctx->d_ctx_state,ctx->d_ctx_key2 )
+		);
+	}
+	else if(miner_algo == cryptonight_saronite)
+	{
+		CUDA_CHECK_MSG_KERNEL(
+			ctx->device_id,
+			"\n**suggestion: Try to increase the value of the attribute 'bfactor' in the NVIDIA config file.**",
+			cryptonight_extra_gpu_final<cryptonight_saronite><<<grid, block >>>( wsize, target, ctx->d_result_count, ctx->d_result_nonce, ctx->d_ctx_state,ctx->d_ctx_key2 )
 		);
 	}
 	else if(miner_algo == cryptonight_bittube2)
@@ -676,6 +690,7 @@ extern "C" int cuda_get_deviceinfo(nvid_ctx* ctx)
 		if(
 			cryptonight_heavy == ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() ||
 			cryptonight_haven == ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() ||
+			cryptonight_saronite == ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() ||
 			cryptonight_bittube2 == ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo()
 		)
 			perThread += 50 * 4; // state double buffer
