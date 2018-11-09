@@ -812,7 +812,7 @@ __kernel void JOIN(cn1,ALGO) (__global uint4 *Scratchpad, __global ulong *states
 			int d = ((__global int*)(Scratchpad + (IDX((idx0) >> 4))))[2];
 			long q = n / (d | 0x5);
 			*((__global long*)(Scratchpad + (IDX((idx0) >> 4)))) = n ^ q;
-			idx0 = (d ^ q ^ 0x33c70f);
+			idx0 = (d ^ q ^ 0x33c70f) & MASK;
 
 // cryptonight_haven
 #elif (ALGO == 9)
